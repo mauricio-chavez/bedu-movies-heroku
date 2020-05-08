@@ -1,7 +1,8 @@
-const express = require('express')
-const mongoose = require('mongoose')
 const bodyParser = require('body-parser')
+const cors = require('cors')
+const express = require('express')
 const { body } = require('express-validator');
+const mongoose = require('mongoose')
 const MovieModel = require('./models/movie')
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
@@ -12,6 +13,7 @@ const app = express()
 // Middleware
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
+app.use(cors())
 
 app.get('/', async (req, res) => {
   const movies = await MovieModel.find()
