@@ -1,7 +1,7 @@
 const bodyParser = require('body-parser')
 const cors = require('cors')
 const express = require('express')
-const { body } = require('express-validator');
+const { body, validationResult } = require('express-validator');
 const mongoose = require('mongoose')
 const MovieModel = require('./models/movie')
 if (process.env.NODE_ENV !== 'production') {
@@ -26,6 +26,12 @@ app.get('/:id', async (req, res) => {
   res.json(movie)
 })
 
+app.delete('/:id', async (req, res) => {
+  const { id } = req.params
+  const movie = await MovieModel.findByIdAndDelete(id)
+  res.json(movie)
+})
+
 app.post('/', [
   body('title').isString().not().isEmpty(),
   body('director').isString(),
@@ -34,8 +40,13 @@ app.post('/', [
   body('rottenTomatoesRating').isFloat(),
   body('imdbRating').isFloat(),
 ], async (req, res) => {
-  const movie = await MovieModel.create(req.body)
-  res.json(movie)
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() });
+  } else {
+    const movie = await MovieModel.create(req.body)
+    res.json(movie)
+  }
 })
 
 const server = app.listen(process.env.PORT || 3000, async () => {
